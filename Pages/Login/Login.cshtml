@@ -1,0 +1,270 @@
+@page "/login"
+@model LoginModel
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/custom-styles.css" />
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header Bar -->
+        <div class="header-bar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="login-card">
+                <h1 class="login-title">Iniciar Sesión</h1>
+                <div class="divider-line"></div>
+
+                <form method="post" class="needs-validation" novalidate>
+                    <!-- Document Type Tabs -->
+                    <div class="doc-tabs">
+                        <button type="button" class="doc-tab active" data-doc-type="DNI" onclick="setDocumentType('DNI')">DNI</button>
+                        <button type="button" class="doc-tab" data-doc-type="CE" onclick="setDocumentType('CE')">CE</button>
+                    </div>
+                    <input type="hidden" id="documentType" name="documentType" value="DNI">
+
+                    <!-- Usuario Field -->
+                    <div class="form-group">
+                        <label for="username">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background-color: #f5f5f5; border-color: #D0D0D0;">
+                                <i class="bi bi-card-text"></i>
+                            </span>
+                            <input type="number" class="form-control" id="username" name="username" placeholder="Ingesar usuario" min="10000000" max="99999999" required>
+                        </div>
+                        <small class="form-text text-danger d-none" id="digitHint"></small>
+                        <div class="invalid-feedback">
+                            Por favor ingresa un número de documento válido.
+                        </div>
+                    </div>
+
+                    <!-- Contraseña Field -->
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <div class="input-group input-group-icon">
+                            <span class="input-group-text" style="background-color: #f5f5f5; border-color: #D0D0D0;">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Ingesar contraseña" required>
+                            <button type="button" class="btn btn-outline-secondary toggle-password" onclick="togglePassword()" style="border-color: #D0D0D0;">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            Por favor ingresa tu contraseña.
+                        </div>
+                    </div>
+
+                    <!-- Forgot Password Link -->
+                    <div class="forgot-password">
+                        <a href="#">¿Olvidó su contraseña?</a>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @Model.ErrorMessage
+                        </div>
+                    }
+
+                    <!-- Login Button -->
+                    <button type="submit" class="btn btn-gobpe-primary w-100" id="submitBtn">
+                        Ingresar
+                    </button>
+                </form>
+
+                <!-- Support Link -->
+                <div class="support-link">
+                    <span class="support-icon">👤</span>
+                    <span>¿Necesita ayuda? <a href="#">contacte con el área de soporte</a></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bar -->
+        <div class="footer-bar">
+            <img src="https://guias.servicios.gob.pe/static/archivos/gb1.svg" alt="Gob.pe Logo" />
+            <span>Presidencia del Consejo de Ministros - Centro Nacional Requerimientos Especiales</span>
+        </div>
+    </div>
+
+    <!-- Session Expired Modal -->
+    <div class="modal fade" id="sessionExpiredModal" tabindex="-1" aria-labelledby="sessionExpiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content session-expired-modal">
+                <div class="modal-header session-expired-modal-header">
+                    <h5 class="modal-title" id="sessionExpiredModalLabel">
+                        <i class="bi bi-exclamation-circle-fill"></i> Sesión Cerrada
+                    </h5>
+                </div>
+                <div class="modal-body session-expired-modal-body">
+                    <p class="session-expired-message">Su sesión ha sido cerrada por inactividad.</p>
+                    <p class="session-expired-description">Por razones de seguridad, su sesión fue terminada después de 1 minuto sin actividad.</p>
+                </div>
+                <div class="modal-footer session-expired-modal-footer">
+                    <button type="button" class="btn btn-danger-gobpe" data-bs-dismiss="modal">
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar modal de sesión expirada si es necesario
+        document.addEventListener('DOMContentLoaded', function() {
+            const sessionExpired = @(Model.SessionExpired.ToString().ToLower());
+            if (sessionExpired === true) {
+                const modal = new bootstrap.Modal(document.getElementById('sessionExpiredModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                modal.show();
+            }
+        });
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.classList.remove('bi-eye');
+                toggleBtn.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.classList.remove('bi-eye-slash');
+                toggleBtn.classList.add('bi-eye');
+            }
+        }
+
+        // Document type tabs
+        document.querySelectorAll('.doc-tab').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.doc-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                setDocumentType(this.getAttribute('data-doc-type'));
+            });
+        });
+
+        // Set document type
+        function setDocumentType(type) {
+            document.getElementById('documentType').value = type;
+            const usernameInput = document.getElementById('username');
+            const digitHint = document.getElementById('digitHint');
+            
+            if (type === 'DNI') {
+                // DNI: exactamente 8 dígitos
+                usernameInput.min = '10000000';
+                usernameInput.max = '99999999';
+                usernameInput.placeholder = 'Ingesar 8 dígitos';
+                usernameInput.maxLength = '8';
+            } else if (type === 'CE') {
+                // CE: exactamente 9 dígitos
+                usernameInput.min = '100000000';
+                usernameInput.max = '999999999';
+                usernameInput.placeholder = 'Ingesar 9 dígitos';
+                usernameInput.maxLength = '9';
+            }
+            
+            // Limpiar el campo cuando se cambia el tipo
+            usernameInput.value = '';
+            digitHint.classList.add('d-none');
+        }
+
+        // Validar input de documento - solo números
+        document.getElementById('username').addEventListener('input', function() {
+            // Permitir solo números
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Limitar según el tipo de documento
+            const documentType = document.getElementById('documentType').value;
+            if (documentType === 'DNI' && this.value.length > 8) {
+                this.value = this.value.slice(0, 8);
+            } else if (documentType === 'CE' && this.value.length > 9) {
+                this.value = this.value.slice(0, 9);
+            }
+        });
+
+        // Validar cuando se enfoca en contraseña o se intenta enviar
+        function validateDocumentNumber() {
+            const usernameInput = document.getElementById('username');
+            const documentType = document.getElementById('documentType').value;
+            const digitHint = document.getElementById('digitHint');
+            const value = usernameInput.value;
+            
+            if (value === '') {
+                digitHint.classList.add('d-none');
+                return false;
+            }
+            
+            let isValid = false;
+            if (documentType === 'DNI' && value.length === 8) {
+                isValid = true;
+            } else if (documentType === 'CE' && value.length === 9) {
+                isValid = true;
+            }
+            
+            if (!isValid) {
+                if (documentType === 'DNI') {
+                    digitHint.textContent = 'DNI debe tener 8 dígitos';
+                } else {
+                    digitHint.textContent = 'CE debe tener 9 dígitos';
+                }
+                digitHint.classList.remove('d-none');
+                return false;
+            } else {
+                digitHint.classList.add('d-none');
+                return true;
+            }
+        }
+
+        // Validar cuando se enfoca en contraseña
+        document.getElementById('password').addEventListener('focus', function() {
+            validateDocumentNumber();
+        });
+
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        // Validar documento antes de enviar
+                        if (!validateDocumentNumber()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        } else {
+                            // Bloquear el botón de envío
+                            const submitBtn = document.getElementById('submitBtn');
+                            submitBtn.disabled = true;
+                            submitBtn.textContent = 'Ingresando...';
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+</html>

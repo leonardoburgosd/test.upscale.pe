@@ -1,0 +1,72 @@
+﻿@page "/"
+@model IndexModel
+@{
+    ViewData["Title"] = "Inicio";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/custom-styles.css" />
+</head>
+<body>
+    <div class="page-wrapper">
+        <!-- Header Bar -->
+        <div class="header-bar"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="login-card">
+                <!-- Icon -->
+                <div class="welcome-icon">
+                    🚀
+                </div>
+
+                <!-- Divider -->
+                <div class="divider-line"></div>
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @Model.ErrorMessage
+                    </div>
+                }
+
+                @if (Model.UserFound)
+                {
+                    <!-- Welcome Message with User Name -->
+                    <h1 class="login-title">¡Bienvenida, @Model.UserName @Model.UserSurname!</h1>
+                    
+                    <p class="welcome-subtitle">Su cuenta en el aplicativo X está activada.</p>
+                    <p class="welcome-description">Ya puede iniciar sesión.</p>
+                }
+                else
+                {
+                    <!-- Default Welcome Message -->
+                    <h1 class="login-title">¡Bienvenido!</h1>
+                }
+
+                <!-- Buttons -->
+                <div class="button-container">
+                    <a href="/login" class="btn-gobpe-primary">
+                        Iniciar sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bar -->
+        <div class="footer-bar">
+            <img src="https://guias.servicios.gob.pe/static/archivos/gb1.svg" alt="Gob.pe Logo" />
+            <span>Presidencia del Consejo de Ministros - Centro Nacional Requerimientos Especiales</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

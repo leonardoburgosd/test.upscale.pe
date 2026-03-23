@@ -1,0 +1,248 @@
+@page "/profile"
+@model ProfileModel
+@{
+    ViewData["Title"] = "Perfil de usuario";
+}
+
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="profile-avatar">
+        <i class="bi bi-person-fill"></i>
+    </div>
+    <div class="profile-info">
+        <h3>@(Model.UserNames ?? "Usuario") @(Model.UserFathersSurname ?? "") @(Model.UserMothersSurname ?? "")</h3>
+        <div class="role">@(Model.UserRole ?? "Operador")</div>
+        <span class="status-badge">Activo</span>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-section">
+    <a class="tab-link active" onclick="switchTab('basic')">Información básica</a>
+    <a class="tab-link" onclick="switchTab('responsibilities')">Responsabilidades</a>
+    <a class="tab-link" onclick="switchTab('history')">Historial</a>
+</div>
+
+<!-- Tab Content: Información básica -->
+<div id="basic" class="tab-content active">
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Nombres</div>
+            <div class="info-value">@(Model.UserNames ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Primer Apellido</div>
+            <div class="info-value">@(Model.UserFathersSurname ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Segundo Apellido</div>
+            <div class="info-value">@(Model.UserMothersSurname ?? "-")</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Tipo de Documento</div>
+            <div class="info-value">@(Model.UserDocumentType ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Nº de Documento</div>
+            <div class="info-value">@(Model.UserDocumentNumber ?? 0)</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Fecha de Nacimiento</div>
+            <div class="info-value">@(Model.UserDateOfBirth?.ToString("dd/MM/yyyy") ?? "-")</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Nacionalidad</div>
+            <div class="info-value">@(Model.UserNationality ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Sexo</div>
+            <div class="info-value">@(Model.UserGender == "M" ? "Masculino" : Model.UserGender == "F" ? "Femenino" : "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Correo Principal</div>
+            <div class="info-value">@(Model.UserEmail ?? "-")</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Correo Secundario</div>
+            <div class="info-value">@(Model.UserSecondaryEmail ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Teléfono Principal</div>
+            <div class="info-value">@(Model.UserMainPhone ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Teléfono Secundario</div>
+            <div class="info-value">@(Model.UserSecondaryPhone ?? "-")</div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Tipo de Contratación</div>
+            <div class="info-value">@(Model.UserContractType ?? "-")</div>
+        </div>
+        <div class="info-field">
+            <div class="info-label">Fecha de Contratación</div>
+            <div class="info-value">@(Model.UserHiringDate?.ToString("dd/MM/yyyy") ?? "-")</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Content: Responsabilidades -->
+<div id="responsibilities" class="tab-content">
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Responsabilidades</div>
+            <div class="info-value">No hay responsabilidades asignadas</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Content: Historial -->
+<div id="history" class="tab-content">
+    <div class="info-grid">
+        <div class="info-field">
+            <div class="info-label">Historial</div>
+            <div class="info-value">No hay historial disponible</div>
+        </div>
+    </div>
+</div>
+
+<!-- Inactivity Warning Modal -->
+<div class="modal fade" id="inactivityModal" tabindex="-1" aria-labelledby="inactivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content inactivity-modal">
+            <div class="modal-header inactivity-modal-header">
+                <h5 class="modal-title" id="inactivityModalLabel">
+                    <i class="bi bi-exclamation-circle-fill"></i> Sesión por expirar
+                </h5>
+            </div>
+            <div class="modal-body inactivity-modal-body">
+                <p class="inactivity-message">Su sesión expirará por inactividad en:</p>
+                <div class="inactivity-countdown">
+                    <span id="countdownSeconds">50</span>
+                    <span class="countdown-label">segundos</span>
+                </div>
+                <p class="inactivity-instruction">Haga clic en "Extender sesión" para continuar trabajando.</p>
+            </div>
+            <div class="modal-footer inactivity-modal-footer">
+                <button type="button" class="btn btn-warning-gobpe" onclick="extendSession()">
+                    Extender sesión
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let inactivityWarningTimeout;
+        let countdownInterval;
+        let remainingSeconds = @(Model.RemainingSeconds);
+        let showWarning = @(Model.ShowInactivityWarning ? "true" : "false");
+        let lastActivityTime = new Date();
+        const INACTIVITY_TIMEOUT_MS = 60 * 1000;
+        const WARNING_DURATION_MS = 50 * 1000;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.tab-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            resetInactivityTimer();
+        }
+
+        document.addEventListener('click', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('scroll', resetInactivityTimer);
+
+        function resetInactivityTimer() {
+            lastActivityTime = new Date();
+            clearTimeout(inactivityWarningTimeout);
+            
+            inactivityWarningTimeout = setTimeout(function() {
+                showInactivityWarning();
+            }, INACTIVITY_TIMEOUT_MS);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            resetInactivityTimer();
+            
+            if (showWarning === 'true') {
+                showInactivityWarning();
+            }
+        });
+
+        function showInactivityWarning() {
+            const modal = new bootstrap.Modal(document.getElementById('inactivityModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+            startCountdown();
+        }
+
+        function startCountdown() {
+            remainingSeconds = 50;
+            updateCountdownDisplay();
+
+            countdownInterval = setInterval(function() {
+                remainingSeconds--;
+                updateCountdownDisplay();
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '/login?sessionExpired=true';
+                }
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            document.getElementById('countdownSeconds').textContent = remainingSeconds;
+        }
+
+        function extendSession() {
+            clearInterval(countdownInterval);
+            clearTimeout(inactivityWarningTimeout);
+            
+            const modalElement = document.getElementById('inactivityModal');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            
+            if (modal) {
+                modal.hide();
+            }
+            
+            fetch('/profile?handler=ExtendSession', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    resetInactivityTimer();
+                }
+            })
+            .catch(error => {
+                console.error('Error al extender sesión:', error);
+            });
+        }
+    </script>
+}
